@@ -37,8 +37,8 @@ export class MessagesController {
     return this.messagesService.getMessages(userId, req.user);
   }
 
-  @Get('stream_new_messages')
-  streamNewMessages(@Req() req: Request) {
-    return this.messagesService.streamNewMessages(req.user);
+  @Sse('stream/:token')
+  connectStream(@Param('token') token: string) {
+    return this.messagesService.connectStream(token);
   }
 }

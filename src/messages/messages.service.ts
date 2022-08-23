@@ -15,7 +15,10 @@ import { CreateMessageDto } from './dto/create-message.dto';
 import { Message } from './entity/message.entity';
 
 @Injectable()
-export class MessagesService extends EntityService<Message> {
+export class MessagesService
+  extends EntityService<Message>
+  implements OnModuleInit
+{
   constructor(
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
@@ -25,17 +28,28 @@ export class MessagesService extends EntityService<Message> {
     super(messageRepository);
   }
 
-  private messages: any = {};
+  observer: Observable<unknown>;
+  subscription: Subscriber<unknown>;
 
-  async streamNewMessages(user: User) {
-    const messages = this.messages[user.id];
-    delete this.messages[user.id];
-    return messages;
+  async onModuleInit() {
+    this.observer = new Observable((subscriber) => {
+      this.subscription = subscriber;
+    });
+  }
+
+  async connectStream(token: string) {
+    let payload;
+    try {
+      payload = await this.jwtService.verify(token);
+    } catch (e) {
+      throw new ForbiddenException(e.message);
+    }
+
+    return this.observer.pipe(map((data) => ({ data: data[payload._id] })));
   }
 
   streamMessage(userId: string, data: any) {
-    if (!this.messages[userId]) this.messages[userId] = [data];
-    else this.messages[userId].push(data);
+    this.subscription?.next({ [userId]: data });
   }
 
   async handleCreate(dto: CreateMessageDto) {
