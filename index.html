@@ -6,15 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
   </head>
-  <body>
-    <script>
-      const eventSource = new EventSource(
-        'http://localhost:3028/api/messages/stream_messages/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNjYwODUyODMyLCJleHAiOjE2NjA4NjAwMzJ9.9AzFh050YuCB0FcpK27Yn2EZoBDjlqmtFW3AtOnPVzs',
-      );
+  <body style="background-color: black"></body>
+  <script>
+    const ws = new WebSocket('wss://e980-46-255-33-145.jp.ngrok.io', null, {});
 
-      eventSource.onmessage = (data) => {
-        console.log('New message', data);
-      };
-    </script>
-  </body>
+    ws.addEventListener('open', () => {
+      console.log('opened');
+    });
+
+    ws.addEventListener('close', () => {
+      console.log('closed');
+    });
+  </script>
 </html>

@@ -1,55 +1,32 @@
-import {
-  ForbiddenException,
-  forwardRef,
-  Inject,
-  Injectable,
-  OnModuleInit,
-} from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { interval, map, Observable, Subscriber } from 'rxjs';
 import { Repository } from 'typeorm';
 import { EntityService } from '../common/asbstract/entity-service.abstract';
 import { User } from '../users/entity/user.entity';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { Message } from './entity/message.entity';
+import { MessagesGateway } from './messages.gateway';
 
 @Injectable()
-export class MessagesService
-  extends EntityService<Message>
-  implements OnModuleInit
-{
+export class MessagesService extends EntityService<Message> {
   constructor(
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
 
-    private readonly jwtService: JwtService,
+    @Inject(forwardRef(() => MessagesGateway))
+    private readonly messagesGateway: MessagesGateway,
   ) {
     super(messageRepository);
   }
 
-  observer: Observable<unknown>;
-  subscription: Subscriber<unknown>;
+  activeConnected: any = {};
 
-  async onModuleInit() {
-    this.observer = new Observable((subscriber) => {
-      this.subscription = subscriber;
-    });
-  }
-
-  async connectStream(token: string) {
-    let payload;
-    try {
-      payload = await this.jwtService.verify(token);
-    } catch (e) {
-      throw new ForbiddenException(e.message);
-    }
-
-    return this.observer.pipe(map((data) => ({ data: data[payload._id] })));
-  }
-
-  streamMessage(userId: string, data: any) {
-    this.subscription?.next({ [userId]: data });
+  async sendWebsocketMessage(userId: string, message: Message) {
+    const socketId = this.activeConnected[userId.toString()];
+    if (socketId)
+      this.messagesGateway.server
+        .to(this.activeConnected[userId])
+        .emit('new-message', message);
   }
 
   async handleCreate(dto: CreateMessageDto) {
@@ -59,7 +36,7 @@ export class MessagesService
       relations: ['from', 'to'],
     });
     const to = message.to as User;
-    this.streamMessage(to.id.toString(), message);
+    this.sendWebsocketMessage(to.id.toString(), message);
   }
 
   async getMessages(userId: number, user: User) {

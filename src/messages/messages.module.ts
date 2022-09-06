@@ -6,6 +6,7 @@ import { Message } from './entity/message.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { CONFIG } from '../common/config';
 import { UsersModule } from '../users/users.module';
+import { MessagesGateway } from './messages.gateway';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { UsersModule } from '../users/users.module';
     }),
     UsersModule,
   ],
-  providers: [MessagesService],
+  providers: [MessagesService, MessagesGateway],
   controllers: [MessagesController],
 })
 export class MessagesModule {}
