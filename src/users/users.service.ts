@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { EntityService } from '../common/asbstract/entity-service.abstract';
+import { EntityService } from '../common/abstract/entity-service.abstract';
 import { JwtPayload } from '../common/interface/jwt-payload.interface';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entity/user.entity';

@@ -12,8 +12,11 @@ export class Message {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  text: string;
+  @Column({ nullable: true })
+  text?: string;
+
+  @Column({ nullable: true })
+  imageUrl?: string;
 
   @ManyToOne(() => User, (user) => user.messagesFrom, { cascade: true })
   @JoinColumn()

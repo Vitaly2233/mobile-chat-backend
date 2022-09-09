@@ -5,6 +5,8 @@ import { UsersModule } from './users/users.module';
 
 import { Message } from './messages/entity/message.entity';
 import { User } from './users/entity/user.entity';
+import { ImagesModule } from './images/images.module';
+import { Image } from './images/entity/image.entity';
 
 @Module({
   imports: [
@@ -17,7 +19,7 @@ import { User } from './users/entity/user.entity';
       database: 'chat-app',
       //TODO better to remove
       synchronize: true,
-      entities: [User, Message],
+      entities: [User, Message, Image],
       subscribers: [],
       migrations: [],
       retryAttempts: 1,
@@ -25,6 +27,7 @@ import { User } from './users/entity/user.entity';
     }),
     MessagesModule,
     UsersModule,
+    ImagesModule,
   ],
 })
 export class AppModule {}

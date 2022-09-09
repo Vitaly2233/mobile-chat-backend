@@ -1,9 +1,12 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { EntityService } from '../common/asbstract/entity-service.abstract';
+import { EntityService } from '../common/abstract/entity-service.abstract';
+import { EImageType } from '../images/enum/image-type.enum';
+import { ImagesService } from '../images/images.service';
 import { User } from '../users/entity/user.entity';
 import { CreateMessageDto } from './dto/create-message.dto';
+import { UploadImageDto } from './dto/upload-image.dto';
 import { Message } from './entity/message.entity';
 import { MessagesGateway } from './messages.gateway';
 
@@ -15,6 +18,8 @@ export class MessagesService extends EntityService<Message> {
 
     @Inject(forwardRef(() => MessagesGateway))
     private readonly messagesGateway: MessagesGateway,
+
+    private readonly imagesService: ImagesService,
   ) {
     super(messageRepository);
   }
@@ -37,6 +42,28 @@ export class MessagesService extends EntityService<Message> {
     });
     const to = message.to as User;
     this.sendWebsocketMessage(to.id.toString(), message);
+  }
+
+  async sendImageMessage(dto: UploadImageDto) {
+    const message = await this.messageRepository.save(dto);
+
+    const image = await this.imagesService.createImage(
+      message.id,
+      EImageType.Message,
+      dto.file,
+    );
+
+    await this.messageRepository.save({
+      ...message,
+      imageUrl: this.imagesService.createImageUrl(image.id),
+    });
+
+    const res = await this.messageRepository.findOne({
+      where: { id: message.id },
+      relations: ['from', 'to'],
+    });
+    this.sendWebsocketMessage(dto.to.toString(), res);
+    return res;
   }
 
   async getMessages(userId: number, user: User) {

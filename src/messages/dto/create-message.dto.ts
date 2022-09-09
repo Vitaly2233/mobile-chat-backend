@@ -1,5 +1,6 @@
 import { PickType } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
+import { IsNumber } from '../../common/decorators/is-number.decorator';
 import { Message } from '../entity/message.entity';
 
 export class CreateMessageDto extends PickType(Message, [

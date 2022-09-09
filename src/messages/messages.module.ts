@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { CONFIG } from '../common/config';
 import { UsersModule } from '../users/users.module';
 import { MessagesGateway } from './messages.gateway';
+import { ImagesModule } from '../images/images.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { MessagesGateway } from './messages.gateway';
       signOptions: { expiresIn: '2h' },
     }),
     UsersModule,
+    ImagesModule,
   ],
   providers: [MessagesService, MessagesGateway],
   controllers: [MessagesController],
