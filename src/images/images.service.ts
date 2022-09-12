@@ -33,9 +33,6 @@ export class ImagesService implements OnModuleInit {
   ) {
     const contentType = this.ValidateImageMimetype(file.mimetype);
 
-    const image = await this.findImageByType(entityId, type);
-    if (image) throw new ConflictException('image for entity already exists');
-
     const created = await this.imageRepository.save({
       message: entityId,
       type: EImageType.Message,
